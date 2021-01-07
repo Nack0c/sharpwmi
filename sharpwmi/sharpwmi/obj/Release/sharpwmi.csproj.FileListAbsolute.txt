@@ -3,3 +3,12 @@ C:\Users\Administrator\source\repos\sharpwmi\sharpwmi\bin\Release\sharpwmi.pdb
 C:\Users\Administrator\source\repos\sharpwmi\sharpwmi\obj\Release\sharpwmi.csprojAssemblyReference.cache
 C:\Users\Administrator\source\repos\sharpwmi\sharpwmi\obj\Release\sharpwmi.exe
 C:\Users\Administrator\source\repos\sharpwmi\sharpwmi\obj\Release\sharpwmi.pdb
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Release\sharpwmi.exe.config
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Release\sharpwmi.exe
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Release\sharpwmi.pdb
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Release\IPAddressRange.xml
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csproj.CoreCompileInputs.cache
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csproj.CopyComplete
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.exe
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.pdb
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csproj.Fody.CopyLocal.cache
