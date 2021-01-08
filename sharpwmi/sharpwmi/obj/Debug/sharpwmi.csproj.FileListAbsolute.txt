@@ -4,7 +4,6 @@ C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Debug\sharpwmi.
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Debug\sharpwmi.exe
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Debug\sharpwmi.pdb
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Debug\sharpwmi.exe.config
-C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Debug\IPAddressRange.dll
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\bin\Debug\IPAddressRange.xml
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Debug\sharpwmi.csproj.CopyComplete
-C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Debug\sharpwmi.csprojAssemblyReference.cache
+C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Debug\sharpwmi.csproj.Fody.CopyLocal.cache

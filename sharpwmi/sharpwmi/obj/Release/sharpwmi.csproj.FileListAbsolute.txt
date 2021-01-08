@@ -11,4 +11,5 @@ C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwm
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csproj.CopyComplete
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.exe
 C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.pdb
-C:\Users\Black Sheep\Source\Repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csproj.Fody.CopyLocal.cache
+C:\Users\Black Sheep\source\repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csprojAssemblyReference.cache
+C:\Users\Black Sheep\source\repos\sharpwmi\sharpwmi\sharpwmi\obj\Release\sharpwmi.csproj.Fody.CopyLocal.cache

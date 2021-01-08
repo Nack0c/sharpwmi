@@ -11,24 +11,24 @@ namespace sharpwmi
 {
     class sharpwmi
     {
-        ManagementScope scope;
-        ConnectionOptions options;
+        private ManagementScope scope;
+        private ConnectionOptions options;
 
-        string method;
-        string host;
-        string username = "";
-        string password = "";
-        string command = "";
-        string action = "";
-        string local = "";
-        string remote = "";
+        private string method;
+        private string host;
+        private string username = "";
+        private string password = "";
+        private string command = "";
+        private string action = "";
+        private string local = "";
+        private string remote = "";
 
 
         int delay;
         sharpwmi(string method,string host,string username="",string password="",string command="",string action="",string local = "",string remote="")
         {
             options = new ConnectionOptions();
-            delay = 1000;
+            delay = 5000;
             this.host = host;
             this.method = method;
             this.username = username;
@@ -206,13 +206,13 @@ namespace sharpwmi
                 }
                 else if (action == "upload")
                 {
-                    local = args[4];
+                    local = args[4];    
                     remote = args[5];
                 }
             }
-            string temp;
 
-            void taskProc(string ip, ManualResetEvent manualResetEvent)
+
+            void taskProc(string ip, ref ManualResetEvent manualResetEvent)
             {
                 sharpwmi wmi = new sharpwmi(method, host: ip.ToString().Trim(), username: username, password: password, command: command, action: action, local: local, remote: remote);
                 wmi.run();
@@ -227,7 +227,7 @@ namespace sharpwmi
             {
                 var handler = new ManualResetEvent(false);
                 waits.Add(handler);
-                Task task = Task.Run(() => taskProc(ip.ToString().Trim(), handler));
+                Task task = Task.Run(() => taskProc(ip.ToString().Trim(), ref handler));
             }
 
             //超64线程简易等待 
